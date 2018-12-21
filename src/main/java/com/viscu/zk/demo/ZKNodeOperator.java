@@ -2,6 +2,7 @@ package com.viscu.zk.demo;
 
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
+import org.apache.zookeeper.data.Stat;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,7 +33,6 @@ public class ZKNodeOperator implements Watcher{
             }
         }
     }
-
 
     //创建zk节点
     //acl d w r c a是可以修改权限 w是写权限 r是读权限 c的创建节点的权限 d是删除权限
@@ -69,14 +69,44 @@ public class ZKNodeOperator implements Watcher{
         }
     }
 
-    public static void main(String[] args) {
+    //版本号 乐观锁
+    public Stat set(String path, byte[] data, int version){
+        Stat status = null;
+        try {
+            status = zooKeeper.setData(path, data, version);
+        } catch (KeeperException | InterruptedException e) {
+            System.out.println("版本号不正确");
+        }
+        return status;
+    }
+
+    public static void main(String[] args) throws InterruptedException {
         ZKNodeOperator zkServer = new ZKNodeOperator(ZKConfig.zkServerPathSingle);
         //创建zk节点
 
-        zkServer.createZKNode("/node1", "node1".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        //zkServer.createZKNode("/node1", "node1".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE);
         //ZooDefs.Ids.OPEN_ACL_UNSAFE = world:anyone:cdrwa
 
+        //同步修改节点的数据 异步和创建相同
+        //Stat status = zkServer.set("/node1", "abc".getBytes(), 0);
+        //System.out.println(status.getVersion());
+        //Stat同客户端stat命令
 
+        //异步删除节点
+        zkServer.delete("/node1", 1);
+        Thread.sleep(1000);
+    }
+
+    public void delete(String path, int version){
+        String ctx = "{'delete':'success'}";
+        //同步删除
+        /*try {
+            zooKeeper.delete(path, version);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } */
+        //异步删除
+        zooKeeper.delete(path, version, new DeleteCallBack(), ctx);
     }
 
     public ZooKeeper getZooKeeper() {
