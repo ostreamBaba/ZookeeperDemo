@@ -23,10 +23,10 @@ public class ZKConnect implements Watcher{
     //集群版本
     public static final String zkServerPath = "127.0.0.1:2281,127.0.0.1:2282,127.0.0.1:2283";
 
-
     public static final Integer timeout = 5000;
     public static void main(String[] args) throws IOException, InterruptedException {
-
+        //客户端和zk服务端链接是一个异步的过程
+        //当连接成功后后，客户端会收的一个watch通知
         ZooKeeper zk = new ZooKeeper(zkServerPath, timeout, new ZKConnect());
         //服务端地址 超时时间 所触发的watcher事件
 
