@@ -2,4 +2,4 @@
 
 - 开发环境: linux/Idea Intellij
 
-- 利用dubbokeeper进行监控
+- 利用dubbokeeper进行服务的监控
